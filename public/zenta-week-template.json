@@ -1,0 +1,73 @@
+{
+  "version": 1,
+  "weekStart": "2026-03-23",
+  "exportedAt": "2026-03-24T12:30:00.000Z",
+  "sessions": [
+    {
+      "id": "template-strength-1",
+      "title": "Strength Foundation",
+      "sport": "Strength",
+      "date": "2026-03-24",
+      "startTime": "07:00",
+      "durationMin": 45,
+      "intensity": "Moderate",
+      "status": "Planned",
+      "favorite": false,
+      "exercises": [
+        {
+          "id": "template-strength-1-ex-1",
+          "exerciseId": "strength-foundation",
+          "title": "Strength Foundation",
+          "sets": 3,
+          "reps": 8,
+          "sideMode": "Per side",
+          "bodySideLabel": "leg",
+          "restSeconds": 75
+        },
+        {
+          "id": "template-strength-1-ex-2",
+          "exerciseId": "mobility-hips",
+          "title": "Mobility Hips",
+          "sets": 2,
+          "reps": 10,
+          "sideMode": "Both sides",
+          "bodySideLabel": "leg",
+          "restSeconds": 30
+        }
+      ]
+    },
+    {
+      "id": "template-run-1",
+      "title": "Tempo Run",
+      "sport": "Run",
+      "date": "2026-03-26",
+      "startTime": "19:00",
+      "durationMin": 55,
+      "intensity": "Zone 3",
+      "status": "Planned",
+      "favorite": true,
+      "exercises": [
+        {
+          "id": "template-run-1-ex-1",
+          "exerciseId": "tempo-run",
+          "title": "Tempo Run",
+          "sets": 2,
+          "reps": 12,
+          "sideMode": "Not side-based",
+          "bodySideLabel": "",
+          "restSeconds": 240
+        },
+        {
+          "id": "template-run-1-ex-2",
+          "exerciseId": "cadence-drill",
+          "title": "Cadence Drill",
+          "sets": 4,
+          "reps": 20,
+          "sideMode": "Not side-based",
+          "bodySideLabel": "",
+          "restSeconds": 30
+        }
+      ]
+    }
+  ]
+}

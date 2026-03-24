@@ -1,0 +1,17 @@
+{
+  "name": "Zenta",
+  "short_name": "Zenta",
+  "description": "Zenta — Train with clarity. A focused triathlon and endurance planner for weekly structure, session cards, and exercise search.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0B0F14",
+  "theme_color": "#0B0F14",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
