@@ -566,7 +566,9 @@ export default function App() {
 
             <View style={styles.exerciseList}>
               {visibleExercises.map((exercise) => {
-                const attached = Boolean(selectedSession?.exerciseIds.includes(exercise.id))
+                const attached = Boolean(
+                  selectedSession?.exerciseEntries.some((entry) => entry.exerciseId === exercise.id),
+                )
 
                 return (
                   <View key={exercise.id} style={styles.exerciseCard}>
@@ -598,9 +600,11 @@ export default function App() {
                             session.id === selectedSession.id
                               ? {
                                   ...session,
-                                  exerciseIds: session.exerciseIds.includes(exercise.id)
-                                    ? session.exerciseIds
-                                    : [...session.exerciseIds, exercise.id],
+                                  exerciseEntries: session.exerciseEntries.some(
+                                    (entry) => entry.exerciseId === exercise.id,
+                                  )
+                                    ? session.exerciseEntries
+                                    : [...session.exerciseEntries, createSessionExercise(exercise.id)],
                                 }
                               : session,
                           ),
