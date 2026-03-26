@@ -30,6 +30,110 @@ export const colors = {
   ring: 'rgba(230, 237, 243, 0.18)',
 }
 
+export const spacing = {
+  xxs: 4,
+  xs: 8,
+  sm: 12,
+  md: 16,
+  lg: 20,
+  xl: 24,
+  '2xl': 32,
+} as const
+
+export const radii = {
+  sm: 12,
+  md: 16,
+  lg: 20,
+  xl: 24,
+  pill: 999,
+} as const
+
+export const typography = {
+  eyebrow: {
+    fontSize: 11,
+    lineHeight: 14,
+    fontWeight: '600' as const,
+    letterSpacing: 1.6,
+  },
+  label: {
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: '500' as const,
+  },
+  body: {
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: '400' as const,
+  },
+  bodyStrong: {
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: '500' as const,
+  },
+  caption: {
+    fontSize: 12,
+    lineHeight: 17,
+    fontWeight: '500' as const,
+  },
+  button: {
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: '600' as const,
+  },
+  titleSm: {
+    fontSize: 18,
+    lineHeight: 24,
+    fontWeight: '600' as const,
+  },
+  titleMd: {
+    fontSize: 20,
+    lineHeight: 28,
+    fontWeight: '600' as const,
+  },
+  titleLg: {
+    fontSize: 22,
+    lineHeight: 30,
+    fontWeight: '700' as const,
+  },
+} as const
+
+export const shadows = {
+  card: {
+    shadowColor: '#000000',
+    shadowOpacity: 0.16,
+    shadowRadius: 22,
+    shadowOffset: { width: 0, height: 10 },
+    elevation: 3,
+  },
+  focus: {
+    shadowColor: colors.text,
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 0 },
+  },
+} as const
+
+export const layout = {
+  screenPadding: spacing.md,
+  sectionGap: spacing.md,
+  controlMinHeight: 46,
+  buttonHeights: {
+    default: 50,
+    sm: 42,
+    icon: 44,
+    iconSm: 36,
+  },
+} as const
+
+export const theme = {
+  colors,
+  spacing,
+  radii,
+  typography,
+  shadows,
+  layout,
+} as const
+
 type CardProps = {
   children: ReactNode
   style?: StyleProp<ViewStyle>
@@ -39,7 +143,7 @@ type ButtonProps = {
   children?: ReactNode
   icon?: IconName
   variant?: 'default' | 'outline' | 'secondary' | 'ghost' | 'destructive'
-  size?: 'default' | 'sm' | 'icon'
+  size?: 'default' | 'sm' | 'icon' | 'icon-sm'
   onPress?: () => void
   disabled?: boolean
   style?: StyleProp<ViewStyle>
@@ -139,7 +243,7 @@ export function Button({
       {icon ? (
         <MaterialCommunityIcons
           name={icon}
-          size={size === 'icon' ? 18 : 16}
+          size={size === 'icon' ? 18 : size === 'icon-sm' ? 16 : 16}
           color={resolveButtonTextColor(variant, disabled)}
         />
       ) : null}
@@ -173,12 +277,14 @@ export function IconButton({
   icon,
   onPress,
   variant = 'outline',
+  size = 'icon',
   disabled,
   style,
 }: {
   icon: IconName
   onPress?: () => void
   variant?: ButtonProps['variant']
+  size?: Extract<ButtonProps['size'], 'icon' | 'icon-sm'>
   disabled?: boolean
   style?: StyleProp<ViewStyle>
 }) {
@@ -186,7 +292,7 @@ export function IconButton({
     <Button
       icon={icon}
       variant={variant}
-      size="icon"
+      size={size}
       onPress={onPress}
       disabled={disabled}
       style={style}
@@ -287,30 +393,37 @@ const buttonTextStyles = StyleSheet.create({
 
 const sizeStyles = StyleSheet.create({
   default: {
-    borderRadius: 999,
+    borderRadius: radii.pill,
   },
   sm: {
-    borderRadius: 999,
+    borderRadius: radii.pill,
   },
   icon: {
-    borderRadius: 999,
+    borderRadius: radii.pill,
+  },
+  'icon-sm': {
+    borderRadius: radii.pill,
   },
 })
 
 const sizeFillStyles = StyleSheet.create({
   default: {
-    minHeight: 50,
-    paddingHorizontal: 20,
-    paddingVertical: 13,
+    minHeight: layout.buttonHeights.default,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm + 1,
   },
   sm: {
-    minHeight: 42,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
+    minHeight: layout.buttonHeights.sm,
+    paddingHorizontal: spacing.sm + 2,
+    paddingVertical: spacing.xs + 2,
   },
   icon: {
-    width: 44,
-    height: 44,
+    width: layout.buttonHeights.icon,
+    height: layout.buttonHeights.icon,
+  },
+  'icon-sm': {
+    width: layout.buttonHeights.iconSm,
+    height: layout.buttonHeights.iconSm,
   },
 })
 
@@ -319,34 +432,28 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 20,
-    shadowColor: '#000000',
-    shadowOpacity: 0.16,
-    shadowRadius: 22,
-    shadowOffset: { width: 0, height: 10 },
-    elevation: 3,
+    borderRadius: radii.lg,
+    ...shadows.card,
   },
   cardHeader: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 20,
-    gap: 6,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.lg,
+    gap: spacing.xs - 2,
   },
   cardContent: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 20,
-    gap: 14,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.lg,
+    gap: spacing.sm + 2,
   },
   cardTitle: {
     color: colors.text,
-    fontSize: 20,
-    fontWeight: '600',
+    ...typography.titleMd,
   },
   cardDescription: {
     color: colors.muted,
-    fontSize: 13,
-    lineHeight: 18,
+    ...typography.label,
   },
   separator: {
     height: 1,
@@ -354,23 +461,21 @@ const styles = StyleSheet.create({
   },
   label: {
     color: colors.muted,
-    fontSize: 13,
-    fontWeight: '500',
+    ...typography.label,
   },
   badge: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: spacing.xs - 2,
     alignSelf: 'flex-start',
     minHeight: 30,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 999,
+    paddingHorizontal: spacing.sm - 2,
+    paddingVertical: spacing.xs - 2,
+    borderRadius: radii.pill,
     borderWidth: 1,
   },
   badgeText: {
-    fontSize: 12,
-    fontWeight: '600',
+    ...typography.caption,
   },
   buttonBase: {
     overflow: 'hidden',
@@ -379,11 +484,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
+    gap: spacing.xs,
   },
   buttonText: {
-    fontSize: 13,
-    fontWeight: '600',
+    ...typography.button,
   },
   buttonPressed: {
     opacity: 0.94,
@@ -393,32 +497,29 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   input: {
-    minHeight: 46,
-    borderRadius: 14,
+    minHeight: layout.controlMinHeight,
+    borderRadius: radii.sm + 2,
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.bg,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
+    paddingHorizontal: spacing.sm + 2,
+    paddingVertical: spacing.sm,
     color: colors.text,
-    fontSize: 14,
+    ...typography.body,
   },
   textArea: {
     minHeight: 104,
-    borderRadius: 14,
+    borderRadius: radii.sm + 2,
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.bg,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
+    paddingHorizontal: spacing.sm + 2,
+    paddingVertical: spacing.sm,
     color: colors.text,
-    fontSize: 14,
+    ...typography.body,
   },
   inputFocused: {
     borderColor: '#334155',
-    shadowColor: colors.text,
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 0 },
+    ...shadows.focus,
   },
 })
