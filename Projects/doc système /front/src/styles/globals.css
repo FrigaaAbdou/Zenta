@@ -1,0 +1,106 @@
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource-variable/geist";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: #fffaf9;
+  color: #101828;
+  font-family: Inter, system-ui, sans-serif;
+}
+
+@layer base {
+  .theme {
+    --font-heading: var(--font-sans);
+    --font-sans: 'Geist Variable', sans-serif;
+  }
+  :root {
+    --background: 12 100% 99%;
+    --foreground: 224 32% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 224 32% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 224 32% 10%;
+    --primary: 354 100% 52%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 10 60% 97%;
+    --secondary-foreground: 224 32% 10%;
+    --muted: 10 60% 97%;
+    --muted-foreground: 220 9% 38%;
+    --accent: 10 60% 95%;
+    --accent-foreground: 224 32% 10%;
+    --destructive: 0 84% 60%;
+    --border: 8 30% 90%;
+    --input: 8 30% 90%;
+    --ring: 354 100% 52%;
+    --chart-1: 354 100% 52%;
+    --chart-2: 354 90% 46%;
+    --chart-3: 9 70% 72%;
+    --chart-4: 140 34% 64%;
+    --chart-5: 220 10% 52%;
+    --radius: 1rem;
+    --sidebar: 0 0% 100%;
+    --sidebar-foreground: 224 32% 10%;
+    --sidebar-primary: 354 100% 52%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 10 60% 97%;
+    --sidebar-accent-foreground: 224 32% 10%;
+    --sidebar-border: 8 30% 90%;
+    --sidebar-ring: 354 100% 52%;
+  }
+  .dark {
+    --background: 224 32% 10%;
+    --foreground: 0 0% 98%;
+    --card: 224 27% 14%;
+    --card-foreground: 0 0% 98%;
+    --popover: 224 27% 14%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 354 100% 62%;
+    --primary-foreground: 224 32% 10%;
+    --secondary: 224 16% 22%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 224 16% 22%;
+    --muted-foreground: 220 10% 72%;
+    --accent: 224 16% 22%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 70% 52%;
+    --border: 224 16% 22%;
+    --input: 224 16% 22%;
+    --ring: 354 100% 62%;
+    --chart-1: 354 100% 62%;
+    --chart-2: 354 92% 56%;
+    --chart-3: 10 65% 72%;
+    --chart-4: 140 30% 58%;
+    --chart-5: 220 10% 72%;
+    --sidebar: 224 27% 14%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 354 100% 62%;
+    --sidebar-primary-foreground: 224 32% 10%;
+    --sidebar-accent: 224 16% 22%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 224 16% 22%;
+    --sidebar-ring: 354 100% 62%;
+  }
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+}
