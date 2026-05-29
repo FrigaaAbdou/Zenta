@@ -81,6 +81,88 @@ export const homeFallbackContent: HomePageContent = {
   },
 };
 
+export function getHomeFallbackContent(locale: "fr" | "ar"): HomePageContent {
+  if (locale === "ar") {
+    return {
+      hero: {
+        campaignLabel: "#التضامن_الجزائري_بالدم",
+        title: "التبرع بالدم يعني إنقاذ الأرواح",
+        description:
+          "يمكن لكل تبرع أن يساهم في إنقاذ ما يصل إلى ثلاث أرواح. انضم إلى مركز نقل الدم بالمستشفى الجامعي مصطفى باشا واطلب موعدا في بضع نقرات.",
+        ctaLabel: "أتبرع الآن",
+      },
+      impact: {
+        sectionLabel: "حملة توعوية مستمرة",
+        title: "أثرنا",
+        description:
+          "التبرع المنتظم يدعم مباشرة احتياجات نقل الدم في المؤسسات الاستشفائية وحالات الاستعجال الحيوية.",
+        stats: [
+          { label: "متبرعون تتم تعبئتهم يوميا", value: "135+" },
+          { label: "تكفل ومتابعة منسقة", value: "24h" },
+          { label: "إجراء مؤطر وآمن", value: "100%" },
+        ],
+      },
+      eligibilityPreview: {
+        sectionLabel: "الأهلية",
+        title: "هل أنا مؤهل للتبرع؟",
+        description:
+          "تحقق من أهليتك قبل طلب الموعد. إذا كان لديك شك، ففريقنا الصحي موجود لإرشادك.",
+        items: [
+          {
+            title: "العمر بين 18 و65 سنة",
+            description: "بلوغ السن المطلوب للتبرع في ظروف جيدة.",
+          },
+          {
+            title: "الوزن الأدنى 50 كلغ",
+            description: "ضمان تبرع آمن ومتوافق مع وضعك الصحي.",
+          },
+          {
+            title: "حالة صحية جيدة",
+            description: "عدم وجود أعراض أو موانع فورية للتبرع.",
+          },
+          {
+            title: "عدم الحضور على الريق",
+            description: "تناول وجبة خفيفة وشرب الماء قبل التوجه إلى المركز.",
+          },
+        ],
+      },
+      ctaBanner: {
+        title: "احجز موعدك في بضع نقرات",
+        description:
+          "أرسل طلب موعدك وانضم إلى مجتمع من المتبرعين الملتزمين لدعم المرضى المحتاجين إلى نقل الدم.",
+        ctaLabel: "طلب موعد",
+      },
+      process: {
+        sectionLabel: "مسار التبرع",
+        title: "كيف يتم الأمر؟",
+        description:
+          "يبقى مسار التبرع بسيطا ومؤطرا ومطمئنا في كل مرحلة.",
+        items: [
+          {
+            title: "قبل التبرع",
+            description: "التحقق من الأهلية والاستقبال والتوجيه الطبي.",
+          },
+          {
+            title: "أثناء التبرع",
+            description: "سحب آمن ومرافقة طوال العملية.",
+          },
+          {
+            title: "بعد التبرع",
+            description: "فترة راحة ووجبة خفيفة وتوصيات للتعافي.",
+          },
+        ],
+      },
+      support: {
+        label: "هل لديك سؤال آخر؟",
+        phone: "+213 560 038 317",
+        email: "cts.chu.mustapha@gmail.com",
+      },
+    };
+  }
+
+  return homeFallbackContent;
+}
+
 function mapHomeContent(
   payload: HomeContentApiResponse,
   campaign?: CampaignItem | null,

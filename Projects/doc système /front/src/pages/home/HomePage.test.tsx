@@ -1,6 +1,7 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 
+import { LocaleProvider } from "@/i18n/locale";
 import { HomePage } from "@/pages/home/HomePage";
 
 vi.mock("@/lib/api/campaignApi", () => ({
@@ -20,6 +21,13 @@ vi.mock("@/lib/api/homeApi", async () => {
     ...actual,
     getHomeContent: vi.fn().mockResolvedValue(actual.homeFallbackContent),
   };
+});
+
+beforeEach(() => {
+  if (typeof window.localStorage?.removeItem === "function") {
+    window.localStorage.removeItem("cts-app-locale");
+  }
+  vi.clearAllMocks();
 });
 
 test("renders the homepage critical sections", async () => {
@@ -152,4 +160,31 @@ test("renders dynamic homepage content from backend-driven sections", async () =
   expect(
     screen.getByRole("heading", { level: 2, name: /le parcours/i }),
   ).toBeInTheDocument();
+});
+
+test("falls back to arabic homepage copy when content loading fails in ar locale", async () => {
+  const { getHomeContent } = await import("@/lib/api/homeApi");
+
+  if (typeof window.localStorage?.setItem === "function") {
+    window.localStorage.setItem("cts-app-locale", "fr");
+  }
+  vi.mocked(getHomeContent).mockRejectedValue(new Error("home failure"));
+
+  render(
+    <LocaleProvider>
+      <MemoryRouter>
+        <HomePage />
+      </MemoryRouter>
+    </LocaleProvider>,
+  );
+
+  fireEvent.click(screen.getAllByRole("button", { name: "AR" })[0]);
+
+  expect(
+    await screen.findByRole("heading", {
+      level: 1,
+      name: /التبرع بالدم يعني إنقاذ الأرواح/i,
+    }),
+  ).toBeInTheDocument();
+  expect(screen.getByText(/احجز موعدك في بضع نقرات/i)).toBeInTheDocument();
 });

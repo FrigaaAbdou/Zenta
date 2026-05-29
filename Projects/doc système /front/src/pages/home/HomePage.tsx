@@ -12,17 +12,21 @@ import { useLocale } from "@/i18n/locale";
 import { getFeaturedCampaign } from "@/lib/api/campaignApi";
 import { getFaq } from "@/lib/api/faqApi";
 import {
+  getHomeFallbackContent,
   getHomeContent,
-  homeFallbackContent,
 } from "@/lib/api/homeApi";
 
 export function HomePage() {
   const { locale } = useLocale();
-  const [content, setContent] = useState<HomePageContent>(homeFallbackContent);
+  const [content, setContent] = useState<HomePageContent>(
+    getHomeFallbackContent(locale),
+  );
   const [faqItems, setFaqItems] = useState<FaqItem[]>([]);
 
   useEffect(() => {
     let isActive = true;
+
+    setContent(getHomeFallbackContent(locale));
 
     void (async () => {
       const [featuredCampaignResult, faqResult] = await Promise.allSettled([
@@ -47,7 +51,7 @@ export function HomePage() {
         }
       } catch {
         if (isActive) {
-          setContent(homeFallbackContent);
+          setContent(getHomeFallbackContent(locale));
         }
       }
     })();

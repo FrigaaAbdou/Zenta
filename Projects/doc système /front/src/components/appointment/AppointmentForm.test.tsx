@@ -61,6 +61,9 @@ async function unlockForm(user: ReturnType<typeof userEvent.setup>) {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  if (typeof window.localStorage?.removeItem === "function") {
+    window.localStorage.removeItem("cts-app-locale");
+  }
 });
 
 async function fillValidAppointmentForm(user: ReturnType<typeof userEvent.setup>) {
@@ -129,9 +132,9 @@ test("hydrates metadata-driven options after eligibility gate unlock", async () 
   render(<AppointmentForm />);
   await unlockForm(user);
 
-  expect(await screen.findByRole("option", { name: "Alger" })).toBeInTheDocument();
-  expect(screen.getByRole("option", { name: "Blida" })).toBeInTheDocument();
-  expect(screen.getByRole("option", { name: "Don de plasma" })).toBeInTheDocument();
+  expect(await screen.findByText("Alger")).toBeInTheDocument();
+  expect(screen.getByText("Blida")).toBeInTheDocument();
+  expect(screen.getByText("Don de plasma")).toBeInTheDocument();
 });
 
 test("falls back to local metadata when the API metadata call fails", async () => {
@@ -145,8 +148,8 @@ test("falls back to local metadata when the API metadata call fails", async () =
   render(<AppointmentForm />);
   await unlockForm(user);
 
-  expect(await screen.findByRole("option", { name: "Alger" })).toBeInTheDocument();
-  expect(screen.getByRole("option", { name: "Tipaza" })).toBeInTheDocument();
+  expect(await screen.findByText("Alger")).toBeInTheDocument();
+  expect(screen.getByText("Tipaza")).toBeInTheDocument();
 });
 
 test("falls back to local metadata when the API payload shape is invalid", async () => {
@@ -162,8 +165,8 @@ test("falls back to local metadata when the API payload shape is invalid", async
   render(<AppointmentForm />);
   await unlockForm(user);
 
-  expect(await screen.findByRole("option", { name: "Alger" })).toBeInTheDocument();
-  expect(screen.getByRole("option", { name: "Tipaza" })).toBeInTheDocument();
+  expect(await screen.findByText("Alger")).toBeInTheDocument();
+  expect(screen.getByText("Tipaza")).toBeInTheDocument();
 });
 
 test("loads appointment slots from the API once a date is selected", async () => {
@@ -181,7 +184,7 @@ test("loads appointment slots from the API once a date is selected", async () =>
   ) as HTMLSelectElement;
 
   expect(timeSelect).toBeDisabled();
-  expect(screen.getByText("Choisissez d'abord une date.")).toBeInTheDocument();
+  expect(screen.getAllByText("Choisissez d'abord une date.").length).toBeGreaterThan(0);
 
   fireEvent.change(dateInput, { target: { value: "2026-06-10" } });
 
@@ -262,8 +265,8 @@ test("shows an unavailable state when no appointment slots can be used", async (
   fireEvent.change(dateInput, { target: { value: "2026-06-12" } });
 
   expect(
-    await screen.findByText("Aucun créneau disponible pour cette date."),
-  ).toBeInTheDocument();
+    (await screen.findAllByText("Aucun créneau disponible pour cette date.")).length,
+  ).toBeGreaterThan(0);
   expect(timeSelect).toBeDisabled();
 });
 

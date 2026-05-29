@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { AppointmentFormSection } from "@/components/appointment/AppointmentFormSection";
@@ -9,7 +9,7 @@ import {
 } from "@/components/appointment/EligibilityGate";
 import { getActiveCampaigns } from "@/lib/api/campaignApi";
 import {
-  fallbackAppointmentMeta,
+  getFallbackAppointmentMeta,
 } from "@/features/appointment/constants/formOptions";
 import {
   appointmentFormSchema,
@@ -81,8 +81,12 @@ function isAppointmentFormMeta(value: unknown): value is AppointmentFormMeta {
 
 export function AppointmentForm() {
   const { locale } = useLocale();
+  const localizedFallbackMeta = useMemo(
+    () => getFallbackAppointmentMeta(locale),
+    [locale],
+  );
   const [isUnlocked, setIsUnlocked] = useState(false);
-  const [meta, setMeta] = useState<AppointmentFormMeta>(fallbackAppointmentMeta);
+  const [meta, setMeta] = useState<AppointmentFormMeta>(localizedFallbackMeta);
   const [campaignOptions, setCampaignOptions] = useState<
     Array<{ value: string; label: string }>
   >(() => [...getFallbackCampaignOptions(locale)]);
@@ -126,12 +130,71 @@ export function AppointmentForm() {
   const selectedWilayaCode = form.watch("wilayaCode");
   const selectedAppointmentDate = form.watch("appointmentDate");
   const selectedCampaignCode = form.watch("campaignCode");
-  const safeMeta = isAppointmentFormMeta(meta) ? meta : fallbackAppointmentMeta;
+  const safeMeta = isAppointmentFormMeta(meta) ? meta : localizedFallbackMeta;
   const communeOptions = safeMeta.communesByWilaya[selectedWilayaCode] ?? [];
   const availableSlotOptions = slotOptions.filter((slot) => slot.isAvailable);
   const copy =
     locale === "ar"
       ? {
+          sections: {
+            personal: "المعلومات الشخصية",
+            appointment: "الموعد",
+            donationType: "نوع التبرع",
+            existingDonor: "هل سبق لك التبرع؟",
+            remarks: "ملاحظات أو احتياجات خاصة",
+          },
+          fields: {
+            lastName: "اللقب",
+            firstName: "الاسم",
+            birthDate: "تاريخ الميلاد",
+            gender: "الجنس",
+            phone: "الهاتف",
+            email: "البريد الإلكتروني",
+            wilaya: "الولاية",
+            commune: "البلدية",
+            campaign: "الحملة",
+            appointmentDate: "تاريخ الموعد",
+            appointmentTime: "وقت الموعد",
+            bloodGroup: "فصيلة الدم",
+            donationType: "نوع التبرع",
+            existingDonor: "هل سبق لك التبرع بالدم؟",
+            lastDonationDate: "تاريخ آخر تبرع",
+            remarks: "ملاحظات",
+          },
+          placeholders: {
+            lastName: "لقبك",
+            firstName: "اسمك",
+            email: "name@example.com",
+            wilaya: "اختر ولاية",
+            commune: "اختر بلدية",
+            bloodGroup: "اختر فصيلة",
+            donationType: "اختر نوع التبرع",
+            remarks: "رسالتك",
+          },
+          hints: {
+            campaign: "اختياري إذا كنت تأتي في إطار حملة محددة.",
+            dateFirst: "اختر تاريخا أولا.",
+            loadingSlots: "جار تحميل المواعيد...",
+            noSlotsForDate: "لا توجد مواعيد متاحة في هذا التاريخ.",
+            selectWilayaFirst: "اختر ولاية أولا",
+            selectCommune: "اختر بلدية",
+            selectSlot: "اختر موعدا",
+            slotsUnavailable: "المواعيد غير متاحة",
+            selectBloodGroup: "اختر فصيلة دم",
+            selectDonationType: "اختر نوع التبرع",
+            remarks:
+              "اختياري للإشارة إلى قيد خاص أو معلومة مفيدة.",
+            backendReady:
+              "الاستمارة جاهزة للربط مع الواجهة الخلفية وتدير بالفعل رسائل أخطاء الـ API.",
+          },
+          options: {
+            yes: "نعم",
+            no: "لا",
+          },
+          actions: {
+            submitting: "جار الإرسال...",
+            submit: "إرسال طلبي",
+          },
           success:
             "تم إرسال طلبك. سنتواصل معك لتأكيد الموعد.",
           validationError: "بعض الحقول غير صالحة. يرجى التحقق من الاستمارة.",
@@ -139,8 +202,68 @@ export function AppointmentForm() {
           serverError: "واجه الخادم خطأ. يرجى إعادة المحاولة لاحقا.",
           networkError:
             "تعذر إرسال الطلب حاليا. قد لا تكون الواجهة الخلفية متاحة بعد.",
+          slotLoadError: "تعذر تحميل المواعيد.",
         }
       : {
+          sections: {
+            personal: "Informations personnelles",
+            appointment: "Rendez-vous",
+            donationType: "Type de don",
+            existingDonor: "Déjà donneur",
+            remarks: "Remarques ou besoins particuliers",
+          },
+          fields: {
+            lastName: "Nom",
+            firstName: "Prénom",
+            birthDate: "Date de naissance",
+            gender: "Sexe",
+            phone: "Téléphone",
+            email: "E-mail",
+            wilaya: "Wilaya",
+            commune: "Commune",
+            campaign: "Campagne",
+            appointmentDate: "Date de rendez-vous",
+            appointmentTime: "Heure de rendez-vous",
+            bloodGroup: "Groupe sanguin",
+            donationType: "Type de don",
+            existingDonor: "Avez-vous déjà donné votre sang ?",
+            lastDonationDate: "Date du dernier don",
+            remarks: "Remarques",
+          },
+          placeholders: {
+            lastName: "Votre nom",
+            firstName: "Votre prénom",
+            email: "nom@exemple.com",
+            wilaya: "Sélectionner une wilaya",
+            commune: "Sélectionner une commune",
+            bloodGroup: "Sélectionner un groupe",
+            donationType: "Sélectionner un type de don",
+            remarks: "Votre message",
+          },
+          hints: {
+            campaign: "Optionnel, si vous venez dans le cadre d'une campagne ciblée.",
+            dateFirst: "Choisissez d'abord une date.",
+            loadingSlots: "Chargement des créneaux...",
+            noSlotsForDate: "Aucun créneau disponible pour cette date.",
+            selectWilayaFirst: "Choisissez d'abord une wilaya",
+            selectCommune: "Sélectionner une commune",
+            selectSlot: "Sélectionner un créneau",
+            slotsUnavailable: "Créneaux indisponibles",
+            selectBloodGroup: "Sélectionner un groupe",
+            selectDonationType: "Sélectionner un type de don",
+            remarks:
+              "Optionnel, pour signaler une contrainte particulière ou une information utile.",
+            backendReady:
+              "Le formulaire est prêt pour le branchement backend et gère déjà les retours d'erreur API.",
+          },
+          options: {
+            yes: "Oui",
+            no: "Non",
+          },
+          actions: {
+            submitting: "Envoi en cours...",
+            submit: "Envoyer ma demande",
+          },
           success:
             "Votre demande a été envoyée. Nous vous recontacterons pour confirmation.",
           validationError:
@@ -151,7 +274,13 @@ export function AppointmentForm() {
             "Le serveur a rencontré une erreur. Merci de réessayer un peu plus tard.",
           networkError:
             "Impossible d'envoyer la demande pour le moment. L'API n'est peut-être pas encore disponible.",
+          slotLoadError: "Impossible de charger les créneaux.",
         };
+
+  useEffect(() => {
+    setMeta(localizedFallbackMeta);
+    setCampaignOptions([...getFallbackCampaignOptions(locale)]);
+  }, [locale, localizedFallbackMeta]);
 
   useEffect(() => {
     if (!isUnlocked) {
@@ -168,12 +297,12 @@ export function AppointmentForm() {
           setMeta(
             isAppointmentFormMeta(payload.data)
               ? payload.data
-              : fallbackAppointmentMeta,
+              : localizedFallbackMeta,
           );
         }
       } catch {
         if (!isCancelled) {
-          setMeta(fallbackAppointmentMeta);
+          setMeta(localizedFallbackMeta);
         }
       }
 
@@ -199,7 +328,7 @@ export function AppointmentForm() {
     return () => {
       isCancelled = true;
     };
-  }, [isUnlocked, locale]);
+  }, [isUnlocked, locale, localizedFallbackMeta]);
 
   useEffect(() => {
     if (!isUnlocked || !selectedAppointmentDate) {
@@ -233,7 +362,7 @@ export function AppointmentForm() {
         }
 
         setSlotOptions([]);
-        setSlotsError("Impossible de charger les créneaux.");
+        setSlotsError(copy.slotLoadError);
       })
       .finally(() => {
         if (isCancelled) {
@@ -347,26 +476,26 @@ export function AppointmentForm() {
 
   return (
     <form className="space-y-8" onSubmit={onSubmit} noValidate>
-      <AppointmentFormSection step={1} title="Informations personnelles">
+      <AppointmentFormSection step={1} title={copy.sections.personal}>
         <div className="grid gap-5 sm:grid-cols-2">
-          <Field label="Nom" error={form.formState.errors.lastName?.message}>
+          <Field label={copy.fields.lastName} error={form.formState.errors.lastName?.message}>
             <input
               {...form.register("lastName")}
               className={inputClassName}
-              placeholder="Votre nom"
+              placeholder={copy.placeholders.lastName}
             />
           </Field>
 
-          <Field label="Prénom" error={form.formState.errors.firstName?.message}>
+          <Field label={copy.fields.firstName} error={form.formState.errors.firstName?.message}>
             <input
               {...form.register("firstName")}
               className={inputClassName}
-              placeholder="Votre prénom"
+              placeholder={copy.placeholders.firstName}
             />
           </Field>
 
           <Field
-            label="Date de naissance"
+            label={copy.fields.birthDate}
             error={form.formState.errors.birthDate?.message}
           >
             <input
@@ -376,7 +505,7 @@ export function AppointmentForm() {
             />
           </Field>
 
-          <Field label="Sexe" error={form.formState.errors.gender?.message}>
+          <Field label={copy.fields.gender} error={form.formState.errors.gender?.message}>
             <select {...form.register("gender")} className={inputClassName}>
               {safeMeta.genders.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -386,10 +515,7 @@ export function AppointmentForm() {
             </select>
           </Field>
 
-          <Field
-            label="Téléphone"
-            error={form.formState.errors.phone?.message}
-          >
+          <Field label={copy.fields.phone} error={form.formState.errors.phone?.message}>
             <input
               {...form.register("phone")}
               type="tel"
@@ -398,18 +524,18 @@ export function AppointmentForm() {
             />
           </Field>
 
-          <Field label="E-mail" error={form.formState.errors.email?.message}>
+          <Field label={copy.fields.email} error={form.formState.errors.email?.message}>
             <input
               {...form.register("email")}
               type="email"
               className={inputClassName}
-              placeholder="nom@exemple.com"
+              placeholder={copy.placeholders.email}
             />
           </Field>
 
-          <Field label="Wilaya" error={form.formState.errors.wilayaCode?.message}>
+          <Field label={copy.fields.wilaya} error={form.formState.errors.wilayaCode?.message}>
             <select {...form.register("wilayaCode")} className={inputClassName}>
-              <option value="">Sélectionner une wilaya</option>
+              <option value="">{copy.placeholders.wilaya}</option>
               {safeMeta.wilayas.map((option) => (
                 <option key={option.code} value={option.code}>
                   {option.label}
@@ -418,7 +544,7 @@ export function AppointmentForm() {
             </select>
           </Field>
 
-          <Field label="Commune" error={form.formState.errors.commune?.message}>
+          <Field label={copy.fields.commune} error={form.formState.errors.commune?.message}>
             <select
               {...form.register("commune")}
               className={inputClassName}
@@ -426,8 +552,8 @@ export function AppointmentForm() {
             >
               <option value="">
                 {communeOptions.length === 0
-                  ? "Choisissez d'abord une wilaya"
-                  : "Sélectionner une commune"}
+                  ? copy.hints.selectWilayaFirst
+                  : copy.hints.selectCommune}
               </option>
               {communeOptions.map((commune) => (
                 <option key={commune} value={commune}>
@@ -439,11 +565,11 @@ export function AppointmentForm() {
         </div>
       </AppointmentFormSection>
 
-      <AppointmentFormSection step={2} title="Rendez-vous">
+      <AppointmentFormSection step={2} title={copy.sections.appointment}>
         <div className="grid gap-5 sm:grid-cols-2">
           <Field
-            label="Campagne"
-            hint="Optionnel, si vous venez dans le cadre d'une campagne ciblée."
+            label={copy.fields.campaign}
+            hint={copy.hints.campaign}
           >
             <select {...form.register("campaignCode")} className={inputClassName}>
               {campaignOptions.map((option) => (
@@ -457,7 +583,7 @@ export function AppointmentForm() {
           <div className="hidden sm:block" />
 
           <Field
-            label="Date de rendez-vous"
+            label={copy.fields.appointmentDate}
             error={form.formState.errors.appointmentDate?.message}
           >
             <input
@@ -468,17 +594,17 @@ export function AppointmentForm() {
           </Field>
 
           <Field
-            label="Heure de rendez-vous"
+            label={copy.fields.appointmentTime}
             error={form.formState.errors.appointmentTime?.message}
             hint={
               !selectedAppointmentDate
-                ? "Choisissez d'abord une date."
+                ? copy.hints.dateFirst
                 : slotsLoading
-                  ? "Chargement des créneaux..."
+                  ? copy.hints.loadingSlots
                   : slotsError
                     ? slotsError
                     : availableSlotOptions.length === 0
-                      ? "Aucun créneau disponible pour cette date."
+                      ? copy.hints.noSlotsForDate
                       : undefined
             }
           >
@@ -494,14 +620,14 @@ export function AppointmentForm() {
             >
               <option value="">
                 {!selectedAppointmentDate
-                  ? "Choisissez d'abord une date"
+                  ? copy.hints.dateFirst
                   : slotsLoading
-                    ? "Chargement des créneaux..."
+                    ? copy.hints.loadingSlots
                     : slotsError
-                      ? "Créneaux indisponibles"
+                      ? copy.hints.slotsUnavailable
                       : availableSlotOptions.length === 0
-                        ? "Aucun créneau disponible"
-                        : "Sélectionner un créneau"}
+                        ? copy.hints.noSlotsForDate
+                        : copy.hints.selectSlot}
               </option>
               {availableSlotOptions.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -513,14 +639,14 @@ export function AppointmentForm() {
         </div>
       </AppointmentFormSection>
 
-      <AppointmentFormSection step={3} title="Type de don">
+      <AppointmentFormSection step={3} title={copy.sections.donationType}>
         <div className="grid gap-5 sm:grid-cols-2">
           <Field
-            label="Groupe sanguin"
+            label={copy.fields.bloodGroup}
             error={form.formState.errors.bloodGroup?.message}
           >
             <select {...form.register("bloodGroup")} className={inputClassName}>
-              <option value="">Sélectionner un groupe</option>
+              <option value="">{copy.placeholders.bloodGroup}</option>
               {safeMeta.bloodGroups.map((group) => (
                 <option key={group} value={group}>
                   {group}
@@ -530,11 +656,11 @@ export function AppointmentForm() {
           </Field>
 
           <Field
-            label="Type de don"
+            label={copy.fields.donationType}
             error={form.formState.errors.donationType?.message}
           >
             <select {...form.register("donationType")} className={inputClassName}>
-              <option value="">Sélectionner un type de don</option>
+              <option value="">{copy.placeholders.donationType}</option>
               {safeMeta.donationTypes.map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
@@ -545,10 +671,10 @@ export function AppointmentForm() {
         </div>
       </AppointmentFormSection>
 
-      <AppointmentFormSection step={4} title="Déjà donneur">
+      <AppointmentFormSection step={4} title={copy.sections.existingDonor}>
         <div className="grid gap-6">
           <Field
-            label="Avez-vous déjà donné votre sang ?"
+            label={copy.fields.existingDonor}
             error={form.formState.errors.isExistingDonor?.message}
           >
             <div className="grid gap-4 sm:grid-cols-2">
@@ -564,7 +690,7 @@ export function AppointmentForm() {
                   }
                   className="h-4 w-4 text-brand-red focus:ring-brand-red"
                 />
-                <span className="font-medium text-slate-700">Oui</span>
+                <span className="font-medium text-slate-700">{copy.options.yes}</span>
               </label>
 
               <label className="flex cursor-pointer items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4">
@@ -584,14 +710,14 @@ export function AppointmentForm() {
                   }}
                   className="h-4 w-4 text-brand-red focus:ring-brand-red"
                 />
-                <span className="font-medium text-slate-700">Non</span>
+                <span className="font-medium text-slate-700">{copy.options.no}</span>
               </label>
             </div>
           </Field>
 
           {isExistingDonor ? (
             <Field
-              label="Date du dernier don"
+              label={copy.fields.lastDonationDate}
               error={form.formState.errors.lastDonationDate?.message}
             >
               <input
@@ -606,17 +732,17 @@ export function AppointmentForm() {
 
       <AppointmentFormSection
         step={5}
-        title="Remarques ou besoins particuliers"
+        title={copy.sections.remarks}
       >
         <Field
-          label="Remarques"
-          hint="Optionnel, pour signaler une contrainte particulière ou une information utile."
+          label={copy.fields.remarks}
+          hint={copy.hints.remarks}
           error={form.formState.errors.remarks?.message}
         >
           <textarea
             {...form.register("remarks")}
             className={textareaClassName}
-            placeholder="Votre message"
+            placeholder={copy.placeholders.remarks}
           />
         </Field>
       </AppointmentFormSection>
@@ -627,14 +753,11 @@ export function AppointmentForm() {
           disabled={form.formState.isSubmitting}
           className="inline-flex items-center justify-center rounded-2xl bg-brand-red px-8 py-4 text-base font-semibold text-white shadow-soft transition hover:bg-brand-dark"
         >
-          {form.formState.isSubmitting
-            ? "Envoi en cours..."
-            : "Envoyer ma demande"}
+          {form.formState.isSubmitting ? copy.actions.submitting : copy.actions.submit}
         </button>
 
         <p className="mt-4 text-sm leading-7 text-slate-500">
-          Le formulaire est prêt pour le branchement backend et gère déjà les
-          retours d&apos;erreur API.
+          {copy.hints.backendReady}
         </p>
 
         {submitSuccess ? (

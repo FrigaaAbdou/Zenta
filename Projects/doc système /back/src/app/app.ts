@@ -14,9 +14,24 @@ type AppConfig = {
 
 export function createApp({ corsOrigin, nodeEnv = "development" }: AppConfig) {
   const app = express();
+  const allowedOrigins = corsOrigin
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean);
 
   app.use(helmet());
-  app.use(cors({ origin: corsOrigin }));
+  app.use(
+    cors({
+      origin(origin, callback) {
+        if (!origin || allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
+          callback(null, true);
+          return;
+        }
+
+        callback(new Error("Not allowed by CORS"));
+      },
+    }),
+  );
   app.use(morgan(nodeEnv === "test" ? "tiny" : "dev"));
   app.use(express.json());
   app.use(createRootRouter());
