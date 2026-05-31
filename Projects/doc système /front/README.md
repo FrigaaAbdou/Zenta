@@ -1,6 +1,11 @@
 # front
 
-Frontend React + Vite de l'application de don de sang inspirée de `https://cts-chu-mustapha.com/fr`.
+Frontend React + Vite de l'application de don de sang inspiree de `https://cts-chu-mustapha.com/fr`.
+
+Le repo couvre maintenant :
+- l'experience publique bilingue
+- le parcours de rendez-vous
+- le back-office admin phase 6
 
 ## Run locally
 
@@ -8,6 +13,8 @@ Frontend React + Vite de l'application de don de sang inspirée de `https://cts-
 npm install
 npm run dev
 ```
+
+Le serveur local est generalement utilise sur `http://127.0.0.1:5176`.
 
 ## Test and build
 
@@ -25,7 +32,7 @@ VITE_API_BASE_URL=http://127.0.0.1:4000
 VITE_DEFAULT_LOCALE=fr
 ```
 
-`VITE_API_BASE_URL` can stay empty during visual integration work. In that case, the homepage uses local fallback content and the appointment form fails gracefully on submit.
+`VITE_API_BASE_URL` can stay empty during visual public-only integration work. In that case, the homepage uses local fallback content and the appointment form fails gracefully on submit. The admin area does not have that fallback path and requires the backend.
 
 ## Full-stack local setup
 
@@ -42,6 +49,7 @@ Recommended local sequence:
 ```bash
 npm install
 npm run seed:public
+npm run seed:admin
 npm run dev
 ```
 
@@ -49,21 +57,26 @@ npm run dev
 
 ```bash
 npm install
-npm run dev -- --host 127.0.0.1 --port 5175
+npm run dev -- --host 127.0.0.1 --port 5176
 ```
 
 5. Open:
 
 ```text
-http://127.0.0.1:5175
+http://127.0.0.1:5176
 ```
 
-With the backend running, the homepage, FAQ, campaigns, appointment metadata, slot loading, and appointment submission use the real API.
+With the backend running, the public pages and the admin area use the real API.
 
 ## Main routes
 
 - `/`
 - `/appointment`
+- `/admin/login`
+- `/admin`
+- `/admin/appointments`
+- `/admin/campaigns`
+- `/admin/content`
 - `*` -> not found page
 
 ## Current scope
@@ -76,17 +89,36 @@ With the backend running, the homepage, FAQ, campaigns, appointment metadata, sl
 - app-level locale switching `fr/ar`
 - `rtl` support on the main public views
 - featured campaign support on the homepage
+- admin login with protected routes
+- admin dashboard
+- admin appointment list/detail/status workflow
+- admin campaign management
+- admin homepage content editor
 - frontend critical-path tests with Vitest
-- full-stack integration completed for the public appointment journey
-- bilingual public experience completed for phase 5
+
+## Admin flow
+
+Current admin flow:
+
+1. open `/admin/login`
+2. sign in with a seeded admin account from `back`
+3. browse dashboard, demands, campaigns, and content
+4. sign out from the topbar menu
+
+The admin shell uses:
+
+- persistent desktop sidebar
+- mobile sheet navigation
+- KPI cards and dashboard widgets
+- data tables for operational views
+- simple FR/AR-aware layout behavior
 
 ## Notes
 
-- UI stays intentionally close to the reference site structure and hierarchy.
-- Backend integration follows the documented public API contract in the project docs.
-- The frontend uses app-level locale state and propagates `dir="ltr|rtl"` from the root public layout.
+- UI stays intentionally close to the public product identity while using a more sober dashboard pattern for admin.
+- Backend integration follows the documented public and admin API contracts in the project docs.
+- The frontend uses app-level locale state and propagates `dir="ltr|rtl"` from the root layout.
 - The homepage is primarily backend-driven through `home-content`, `faq`, `campaigns/active`, and `campaigns/featured`.
 - The frontend still keeps graceful fallback behavior if public content endpoints are temporarily unavailable or partially translated.
 - Appointment form metadata, campaigns, and submission locale all follow the active language.
-- One browser-automation limitation was observed during phase 4 validation: the in-app automation surface did not reliably trigger React change handling on the native date input, although the real API flow, tests, and backend contract were verified successfully.
-- The admin interface is not part of this repository baseline.
+- The admin interface requires the backend admin API, `ADMIN_JWT_SECRET`, and seeded users from `npm run seed:admin`.

@@ -126,6 +126,27 @@ test("shows validation errors when required fields are missing", async () => {
   ).toBeInTheDocument();
 });
 
+test("rejects a donor younger than 18", async () => {
+  const user = userEvent.setup();
+
+  render(<AppointmentForm />);
+  await unlockForm(user);
+
+  const birthDateInput = document.querySelector(
+    'input[name="birthDate"]',
+  ) as HTMLInputElement;
+
+  fireEvent.change(birthDateInput, { target: { value: "2010-06-01" } });
+
+  await user.click(screen.getByRole("button", { name: "Envoyer ma demande" }));
+
+  expect(
+    await screen.findByText(
+      "Vous devez avoir au moins 18 ans pour faire une demande de rendez-vous.",
+    ),
+  ).toBeInTheDocument();
+});
+
 test("hydrates metadata-driven options after eligibility gate unlock", async () => {
   const user = userEvent.setup();
 
@@ -268,6 +289,62 @@ test("shows an unavailable state when no appointment slots can be used", async (
     (await screen.findAllByText("Aucun créneau disponible pour cette date.")).length,
   ).toBeGreaterThan(0);
   expect(timeSelect).toBeDisabled();
+});
+
+test("keeps only open slots selectable when admin changes have blocked or closed others", async () => {
+  const user = userEvent.setup();
+  const { getAppointmentSlots } = await import("@/lib/api/appointmentApi");
+
+  vi.mocked(getAppointmentSlots).mockResolvedValueOnce({
+    success: true,
+    data: {
+      date: "2026-06-14",
+      slots: [
+        {
+          value: "08:00",
+          label: "08:00",
+          isAvailable: true,
+          status: "open",
+        },
+        {
+          value: "09:00",
+          label: "09:00",
+          isAvailable: false,
+          status: "blocked",
+        },
+        {
+          value: "10:00",
+          label: "10:00",
+          isAvailable: false,
+          status: "closed",
+        },
+      ],
+    },
+    message: "ok",
+  });
+
+  render(<AppointmentForm />);
+  await unlockForm(user);
+
+  const dateInput = document.querySelector(
+    'input[name="appointmentDate"]',
+  ) as HTMLInputElement;
+  const timeSelect = document.querySelector(
+    'select[name="appointmentTime"]',
+  ) as HTMLSelectElement;
+
+  fireEvent.change(dateInput, { target: { value: "2026-06-14" } });
+
+  await screen.findByRole("option", { name: "08:00" });
+
+  expect(screen.getByRole("option", { name: "08:00" })).toBeInTheDocument();
+  expect(
+    screen.queryByRole("option", { name: "09:00" }),
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole("option", { name: "10:00" }),
+  ).not.toBeInTheDocument();
+  expect(timeSelect).not.toBeDisabled();
 });
 
 test("shows a recoverable message when slot loading fails", async () => {

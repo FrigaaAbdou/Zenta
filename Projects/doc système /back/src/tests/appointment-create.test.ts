@@ -8,10 +8,19 @@ const donorService = vi.hoisted(() => ({
 const appointmentService = vi.hoisted(() => ({
   createAppointmentRequest: vi.fn(),
   findPendingAppointmentConflict: vi.fn(),
+  getAppointmentSlotOccupancy: vi.fn(),
+}));
+
+const appointmentSlotService = vi.hoisted(() => ({
+  getResolvedSlotDefinitionsForDate: vi.fn(),
 }));
 
 vi.mock("../modules/donors/donor.service.js", () => donorService);
 vi.mock("../modules/appointments/appointment.service.js", () => appointmentService);
+vi.mock("../modules/appointments/appointment-slot.service.js", () => ({
+  getResolvedSlotDefinitionsForDate:
+    appointmentSlotService.getResolvedSlotDefinitionsForDate,
+}));
 
 import { createApp } from "../app/app.js";
 
@@ -53,6 +62,18 @@ describe("POST /api/public/appointments", () => {
     donorService.upsertDonorByPhone.mockReset();
     appointmentService.createAppointmentRequest.mockReset();
     appointmentService.findPendingAppointmentConflict.mockReset();
+    appointmentService.getAppointmentSlotOccupancy.mockReset();
+    appointmentService.getAppointmentSlotOccupancy.mockResolvedValue({});
+    appointmentSlotService.getResolvedSlotDefinitionsForDate.mockReset();
+    appointmentSlotService.getResolvedSlotDefinitionsForDate.mockResolvedValue([
+      {
+        value: "10:00",
+        label: "10:00",
+        capacity: 3,
+        status: "open",
+        source: "template",
+      },
+    ]);
   });
 
   it("creates an appointment request and returns a 201 payload", async () => {
@@ -126,5 +147,22 @@ describe("POST /api/public/appointments", () => {
         },
       },
     });
+  });
+
+  it("rejects a request when the selected slot has no remaining capacity", async () => {
+    donorService.upsertDonorByPhone.mockResolvedValue({
+      _id: "6650f9f2c10d4e5d2a3e0101",
+    });
+    appointmentService.findPendingAppointmentConflict.mockResolvedValue(null);
+    appointmentService.getAppointmentSlotOccupancy.mockResolvedValue({
+      "10:00": 3,
+    });
+
+    const response = await request(buildTestApp())
+      .post("/api/public/appointments")
+      .send(validPayload);
+
+    expect(response.status).toBe(409);
+    expect(response.body.error.code).toBe("SLOT_UNAVAILABLE");
   });
 });

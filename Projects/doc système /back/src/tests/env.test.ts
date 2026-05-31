@@ -10,6 +10,8 @@ describe("createEnv", () => {
       MONGODB_URI: "mongodb://localhost:27017/cts",
       CORS_ORIGIN:
         "http://127.0.0.1:5175,https://c646-154-252-4-8.ngrok-free.app",
+      ADMIN_JWT_SECRET: "test-secret",
+      ADMIN_JWT_EXPIRES_IN: "4h",
     });
 
     expect(result).toEqual({
@@ -18,6 +20,8 @@ describe("createEnv", () => {
       MONGODB_URI: "mongodb://localhost:27017/cts",
       CORS_ORIGIN:
         "http://127.0.0.1:5175,https://c646-154-252-4-8.ngrok-free.app",
+      ADMIN_JWT_SECRET: "test-secret",
+      ADMIN_JWT_EXPIRES_IN: "4h",
     });
   });
 
@@ -27,6 +31,7 @@ describe("createEnv", () => {
         PORT: "4100",
         NODE_ENV: "development",
         CORS_ORIGIN: "http://127.0.0.1:5175",
+        ADMIN_JWT_SECRET: "test-secret",
       }),
     ).toThrow(/MONGODB_URI/i);
   });

@@ -87,4 +87,37 @@ describe("appointment endpoint validation", () => {
       lastDonationDate: "Last donation date is required for existing donors.",
     });
   });
+
+  it("returns 422 when the donor is younger than 18", async () => {
+    const response = await request(buildTestApp())
+      .post("/api/public/appointments")
+      .send({
+        firstName: "Amine",
+        lastName: "Brahimi",
+        birthDate: "2010-06-01",
+        gender: "male",
+        phone: "+213560000000",
+        email: "amine@example.com",
+        wilayaCode: "16",
+        commune: "Sidi M'Hamed",
+        bloodGroup: "O+",
+        appointmentDate: "2026-06-01",
+        appointmentTime: "10:00",
+        donationType: "whole_blood",
+        isExistingDonor: false,
+        eligibilityChecklist: {
+          ageConfirmed: true,
+          weightConfirmed: true,
+          healthyConfirmed: true,
+          noContraIndicationConfirmed: true,
+        },
+        locale: "fr",
+      });
+
+    expect(response.status).toBe(422);
+    expect(response.body.error.code).toBe("VALIDATION_ERROR");
+    expect(response.body.fieldErrors).toMatchObject({
+      birthDate: "The donor must be at least 18 years old to request an appointment.",
+    });
+  });
 });

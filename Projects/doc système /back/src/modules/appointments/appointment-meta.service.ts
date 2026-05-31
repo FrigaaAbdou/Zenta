@@ -1,6 +1,6 @@
 import type { SupportedLocale } from "../../shared/constants/locales.js";
 import {
-  APPOINTMENT_TIME_SLOTS,
+  type AppointmentSlotStatus,
   BLOOD_GROUPS,
   COMMUNES_BY_WILAYA,
   DONATION_TYPES_BY_LOCALE,
@@ -8,6 +8,8 @@ import {
   GENDERS_BY_LOCALE,
   WILAYAS_BY_LOCALE,
 } from "./appointment.constants.js";
+import { getResolvedSlotDefinitionsForDate } from "./appointment-slot.service.js";
+import { getAppointmentSlotOccupancy } from "./appointment.service.js";
 
 export function getAppointmentFormMeta(locale: SupportedLocale) {
   return {
@@ -21,13 +23,32 @@ export function getAppointmentFormMeta(locale: SupportedLocale) {
   };
 }
 
-export function getAppointmentSlots(date: string) {
+export async function getAppointmentSlots(date: string) {
+  const occupancyByTime = await getAppointmentSlotOccupancy(date);
+  const slotDefinitions = await getResolvedSlotDefinitionsForDate(date);
+
   return {
     date,
-    slots: APPOINTMENT_TIME_SLOTS.map((value) => ({
-      value,
-      label: value,
-      isAvailable: true,
-    })),
+    slots: slotDefinitions.map((slot) => {
+      const reservedCount = occupancyByTime[slot.value] ?? 0;
+      const remainingCapacity =
+        slot.status === "open"
+          ? Math.max(slot.capacity - reservedCount, 0)
+          : 0;
+      const status: AppointmentSlotStatus =
+        slot.status === "open" && remainingCapacity === 0
+          ? "full"
+          : slot.status;
+
+      return {
+        value: slot.value,
+        label: slot.label,
+        isAvailable: status === "open",
+        capacity: slot.capacity,
+        reservedCount,
+        remainingCapacity,
+        status,
+      };
+    }),
   };
 }

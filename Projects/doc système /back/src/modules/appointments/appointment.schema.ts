@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { BLOOD_GROUPS } from "./appointment.constants.js";
+import { isAdultBirthDate } from "./appointment-age.js";
 
 const dateStringSchema = z
   .string()
@@ -39,6 +40,15 @@ export const createAppointmentRequestSchema = z
     wilayaLabel: z.string().optional(),
   })
   .superRefine((data, context) => {
+    if (!isAdultBirthDate(data.birthDate)) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["birthDate"],
+        message:
+          "The donor must be at least 18 years old to request an appointment.",
+      });
+    }
+
     if (data.isExistingDonor && !data.lastDonationDate) {
       context.addIssue({
         code: z.ZodIssueCode.custom,

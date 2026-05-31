@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isAdultBirthDate } from "./age";
 
 export const appointmentFormSchema = z
   .object({
@@ -25,6 +26,15 @@ export const appointmentFormSchema = z
     remarks: z.string().optional(),
   })
   .superRefine((data, ctx) => {
+    if (!isAdultBirthDate(data.birthDate)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["birthDate"],
+        message:
+          "Vous devez avoir au moins 18 ans pour faire une demande de rendez-vous.",
+      });
+    }
+
     if (data.isExistingDonor && !data.lastDonationDate) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,

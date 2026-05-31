@@ -32,6 +32,10 @@ export type AppointmentSlotsResponse = {
       value: string;
       label: string;
       isAvailable: boolean;
+      capacity?: number;
+      reservedCount?: number;
+      remainingCapacity?: number;
+      status?: "open" | "full" | "closed" | "blocked";
     }>;
   };
   message: string;

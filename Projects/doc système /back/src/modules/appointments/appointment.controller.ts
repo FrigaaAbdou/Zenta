@@ -43,7 +43,7 @@ export function getAppointmentFormMetaController(
   });
 }
 
-export function getAppointmentSlotsController(
+export async function getAppointmentSlotsController(
   request: Request,
   response: Response,
 ) {
@@ -58,7 +58,7 @@ export function getAppointmentSlotsController(
     });
   }
 
-  const data = getAppointmentSlots(result.data.date);
+  const data = await getAppointmentSlots(result.data.date);
 
   return response.status(200).json({
     success: true,
@@ -110,6 +110,24 @@ export async function createAppointmentRequestController(
   });
 
   if (conflict) {
+    throw new AppError({
+      statusCode: 409,
+      code: "SLOT_UNAVAILABLE",
+      message: "Le creneau selectionne n'est plus disponible.",
+      details: {
+        appointmentTime: "Veuillez choisir un autre horaire.",
+      },
+    });
+  }
+
+  const slotAvailability = await getAppointmentSlots(
+    appointment.appointmentDate,
+  );
+  const selectedSlot = slotAvailability.slots.find(
+    (slot) => slot.value === appointment.appointmentTime,
+  );
+
+  if (!selectedSlot || !selectedSlot.isAvailable) {
     throw new AppError({
       statusCode: 409,
       code: "SLOT_UNAVAILABLE",

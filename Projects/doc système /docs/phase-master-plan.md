@@ -29,6 +29,7 @@ Documents d'execution disponibles:
 - `docs/phases/phase-03-plan-execution-back.md`
 - `docs/phases/phase-04-plan-execution-full-stack.md`
 - `docs/phases/phase-05-plan-execution-contenus-campagnes-bilingue.md`
+- `docs/phases/phase-06-plan-execution-back-office-admin.md`
 
 Etat d'execution actuellement atteint:
 
@@ -36,6 +37,7 @@ Etat d'execution actuellement atteint:
 - phase 3 `back`: executee
 - phase 4 integration full-stack: executee avec validation locale, seed public, et limitation documentee sur l'automatisation du champ natif `input[type=date]` dans le navigateur integre
 - phase 5 contenus, campagnes et bilingue: executee avec locale applicative `fr/ar`, support `rtl` sur les vues publiques principales, seed bilingue enrichi, et validation navigateur sur homepage et parcours rendez-vous
+- phase 6 back-office admin: executee avec auth admin JWT, roles V1, dashboard, gestion des demandes, gestion des campagnes, gestion du contenu `home`, et seed admin local
 
 ## 2. Resume executif
 
@@ -228,6 +230,12 @@ Stack suggeree:
 - gestion des campagnes
 - statistiques
 
+Etat actuel :
+
+- ce domaine n'est plus futur au niveau V1
+- un premier back-office admin est livre
+- la gestion avancee des creneaux et les statistiques poussees restent pour la suite
+
 ## 7. Principes de design produit et UI
 
 ### 7.1 Fidelite a la reference
@@ -389,6 +397,8 @@ Livrables attendus:
 - dashboard de base
 - CRUD principaux
 - document detaille: `docs/phases/phase-06-back-office-admin.md`
+- plan d'execution: `docs/phases/phase-06-plan-execution-back-office-admin.md`
+- extension creneaux/calendrier/age: `docs/phases/phase-06-extension-calendrier-creneaux-et-age.md`
 
 ## Phase 7 - Stabilisation, observabilite et deploiement
 

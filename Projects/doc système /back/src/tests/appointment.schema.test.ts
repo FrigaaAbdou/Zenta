@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import {
   createAppointmentRequestSchema,
@@ -50,5 +50,41 @@ describe("appointment schemas", () => {
     });
 
     expect(result.success).toBe(false);
+  });
+
+  it("rejects a donor younger than 18", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-05-30T12:00:00Z"));
+
+    const result = createAppointmentRequestSchema.safeParse({
+      firstName: "Amine",
+      lastName: "Brahimi",
+      birthDate: "2010-06-01",
+      gender: "male",
+      phone: "+213560000000",
+      email: "amine@example.com",
+      wilayaCode: "16",
+      commune: "Sidi M'Hamed",
+      bloodGroup: "O+",
+      appointmentDate: "2026-06-01",
+      appointmentTime: "10:00",
+      donationType: "whole_blood",
+      isExistingDonor: false,
+      eligibilityChecklist: {
+        ageConfirmed: true,
+        weightConfirmed: true,
+        healthyConfirmed: true,
+        noContraIndicationConfirmed: true,
+      },
+      remarks: "",
+      locale: "fr",
+    });
+
+    expect(result.success).toBe(false);
+    expect(result.error?.flatten().fieldErrors.birthDate).toContain(
+      "The donor must be at least 18 years old to request an appointment.",
+    );
+
+    vi.useRealTimers();
   });
 });

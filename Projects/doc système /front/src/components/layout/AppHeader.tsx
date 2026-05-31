@@ -39,8 +39,10 @@ export function AppHeader() {
   const copy = headerCopy[locale];
   const isRtl = isRtlLocale(locale);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const mobileMenuRef = useRef<HTMLDivElement | null>(null);
   const mobileButtonRef = useRef<HTMLButtonElement | null>(null);
+  const lastScrollYRef = useRef(0);
 
   useEffect(() => {
     if (!isMobileMenuOpen) {
@@ -79,26 +81,69 @@ export function AppHeader() {
     };
   }, [isMobileMenuOpen]);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+
+      if (currentScrollY <= 24) {
+        setIsHeaderVisible(true);
+        lastScrollYRef.current = currentScrollY;
+        return;
+      }
+
+      const isScrollingDown = currentScrollY > lastScrollYRef.current;
+      const hasMeaningfulDelta =
+        Math.abs(currentScrollY - lastScrollYRef.current) > 8;
+
+      if (hasMeaningfulDelta) {
+        setIsHeaderVisible(!isScrollingDown || isMobileMenuOpen);
+      }
+
+      lastScrollYRef.current = currentScrollY;
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [isMobileMenuOpen]);
+
   return (
-    <header className="sticky top-0 z-50 border-b border-red-100 bg-white/95 backdrop-blur">
+    <header
+      className={cn(
+        "sticky top-0 z-50 border-b border-red-100 bg-white/95 backdrop-blur transition-transform duration-300 ease-out",
+        isHeaderVisible || isMobileMenuOpen
+          ? "translate-y-0"
+          : "-translate-y-full",
+      )}
+    >
       <PageContainer className="relative py-3 sm:py-4">
         <div className="flex items-center justify-between gap-4">
           <div className="flex min-w-0 items-center gap-3">
-            <div className="flex h-14 w-20 shrink-0 items-center justify-center rounded-md border border-red-100 bg-white text-center text-[10px] font-semibold uppercase tracking-[0.2em] text-brand-red shadow-sm sm:h-16 sm:w-24">
-              CTS
-            </div>
+            <Link
+              to="/"
+              className={cn(
+                "flex min-w-0 items-center gap-3 rounded-xl outline-none transition hover:opacity-90 focus-visible:ring-2 focus-visible:ring-brand-red/30",
+                isRtl && "flex-row-reverse",
+              )}
+            >
+              <div className="flex h-14 w-20 shrink-0 items-center justify-center rounded-md border border-red-100 bg-white text-center text-[10px] font-semibold uppercase tracking-[0.2em] text-brand-red shadow-sm sm:h-16 sm:w-24">
+                CTS
+              </div>
 
-            <div className={cn("min-w-0", isRtl && "text-right")}>
-              <p className="truncate text-sm font-bold leading-tight text-slate-900 sm:text-base">
-                {copy.organizationLine1}
-              </p>
-              <p className="truncate text-sm font-bold leading-tight text-slate-900 sm:text-base">
-                {copy.organizationLine2}
-              </p>
-              <p className="mt-1 truncate text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-                {copy.institution}
-              </p>
-            </div>
+              <div className={cn("min-w-0", isRtl && "text-right")}>
+                <p className="truncate text-sm font-bold leading-tight text-slate-900 sm:text-base">
+                  {copy.organizationLine1}
+                </p>
+                <p className="truncate text-sm font-bold leading-tight text-slate-900 sm:text-base">
+                  {copy.organizationLine2}
+                </p>
+                <p className="mt-1 truncate text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                  {copy.institution}
+                </p>
+              </div>
+            </Link>
           </div>
 
           <div className="hidden items-center gap-4 lg:flex">

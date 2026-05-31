@@ -18,6 +18,8 @@ const envSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   MONGODB_URI: z.string().min(1, "MONGODB_URI is required"),
   CORS_ORIGIN: corsOriginSchema,
+  ADMIN_JWT_SECRET: z.string().min(1, "ADMIN_JWT_SECRET is required"),
+  ADMIN_JWT_EXPIRES_IN: z.string().min(1).default("8h"),
 });
 
 export type Env = z.infer<typeof envSchema>;
@@ -34,4 +36,8 @@ export function getEnv() {
   }
 
   return envCache;
+}
+
+export function resetEnvCache() {
+  envCache = null;
 }

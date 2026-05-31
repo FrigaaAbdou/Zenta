@@ -1,8 +1,12 @@
 # back
 
-Backend public de l'application web CTS CHU Mustapha.
+Backend de l'application web CTS CHU Mustapha.
 
-Ce repo expose l'API consommée par `front`, gère la validation des requêtes publiques, prépare la persistance MongoDB et pose une base modulaire pour les futures fonctionnalités admin.
+Ce repo expose :
+- l'API publique consommee par `front`
+- la persistance MongoDB
+- la logique de rendez-vous
+- le back-office admin phase 6 sous `/api/admin`
 
 Repo frontend associe :
 
@@ -23,14 +27,16 @@ Repo frontend associe :
 
 Le backend couvre actuellement :
 
-- le bootstrap serveur Express
-- la validation d'environnement
-- la connexion MongoDB
-- la gestion centralisée des erreurs
-- les endpoints publics de contenu
-- les endpoints publics de rendez-vous
-- la persistance `donors` et `appointment_requests`
-- la couverture de tests critique du périmètre public
+- bootstrap serveur Express
+- validation d'environnement
+- connexion MongoDB
+- gestion centralisee des erreurs
+- endpoints publics de contenu
+- endpoints publics de rendez-vous
+- persistance `donors` et `appointment_requests`
+- auth admin JWT
+- endpoints admin demandes / campagnes / contenus
+- couverture de tests critique du perimetre public et admin
 
 ## Installation
 
@@ -41,7 +47,7 @@ npm install
 
 ## Variables d'environnement
 
-Copier `back/.env.example` vers `back/.env` puis ajuster les valeurs si nécessaire.
+Copier `back/.env.example` vers `back/.env` puis ajuster les valeurs si necessaire.
 
 Variables requises :
 
@@ -49,6 +55,8 @@ Variables requises :
 - `NODE_ENV`
 - `MONGODB_URI`
 - `CORS_ORIGIN`
+- `ADMIN_JWT_SECRET`
+- `ADMIN_JWT_EXPIRES_IN`
 
 Exemple :
 
@@ -56,12 +64,14 @@ Exemple :
 PORT=4000
 NODE_ENV=development
 MONGODB_URI=mongodb://localhost:27017/cts
-CORS_ORIGIN=http://127.0.0.1:5175
+CORS_ORIGIN=http://127.0.0.1:5175,http://127.0.0.1:5176
+ADMIN_JWT_SECRET=change-me
+ADMIN_JWT_EXPIRES_IN=8h
 ```
 
 ## Commandes
 
-Développement :
+Developpement :
 
 ```bash
 npm run dev
@@ -92,7 +102,19 @@ Ce seed peuple :
 - plusieurs campagnes actives bilingues avec priorite
 - une campagne principale exploitable par la homepage
 
-Exécution du build :
+Seed des comptes admin locaux :
+
+```bash
+npm run seed:admin
+```
+
+Comptes de developpement generes :
+
+- `super_admin@cts.local` / `Admin123!`
+- `manager@cts.local` / `Admin123!`
+- `operator@cts.local` / `Admin123!`
+
+Execution du build :
 
 ```bash
 npm run start
@@ -109,6 +131,7 @@ Sequence recommandee :
 ```bash
 npm install
 npm run seed:public
+npm run seed:admin
 npm run dev
 ```
 
@@ -123,23 +146,16 @@ VITE_DEFAULT_LOCALE=fr
 
 ```bash
 npm install
-npm run dev -- --host 127.0.0.1 --port 5175
+npm run dev -- --host 127.0.0.1 --port 5176
 ```
 
 6. Ouvrir :
 
 ```text
-http://127.0.0.1:5175
+http://127.0.0.1:5176
 ```
 
-Le parcours public integre fonctionne alors entre les deux repos :
-
-- homepage backend-driven
-- FAQ backend-driven
-- campagnes actives backend-driven
-- metadata de rendez-vous
-- chargement dynamique des creneaux
-- creation de demande de rendez-vous
+Le parcours public et admin fonctionne alors entre les deux repos.
 
 ## Structure utile
 
@@ -151,60 +167,64 @@ back/
     lib/
     middlewares/
     modules/
+      admin-auth/
+      admin-appointments/
+      admin-campaigns/
+      admin-content/
       appointments/
       campaigns/
       content/
       donors/
       faq/
     routes/
+    scripts/
     shared/
     tests/
 ```
 
-## Endpoints publics actuellement disponibles
+## Endpoints disponibles
 
 ### Health
 
 - `GET /health`
 
-Réponse :
-
-```json
-{
-  "status": "ok"
-}
-```
-
-### Contenu public
+### Public
 
 - `GET /api/public/home-content?locale=fr|ar`
 - `GET /api/public/faq?locale=fr|ar&category=...`
 - `GET /api/public/campaigns/active?locale=fr|ar`
 - `GET /api/public/campaigns/featured?locale=fr|ar`
 - `GET /api/public/campaigns/:code?locale=fr|ar`
-
-### Métadonnées et créneaux de rendez-vous
-
 - `GET /api/public/appointment-form-meta?locale=fr|ar`
 - `GET /api/public/appointment-slots?date=YYYY-MM-DD&campaignCode=...`
-
-### Création de demande de rendez-vous
-
 - `POST /api/public/appointments`
 
-Le payload attendu suit le contrat défini dans la phase 1 et inclut notamment :
+### Admin auth
 
-- identité donneur
-- coordonnées
-- groupe sanguin
-- date/heure de rendez-vous
-- type de don
-- checklist d'éligibilité
-- locale
+- `POST /api/admin/auth/login`
+- `GET /api/admin/auth/me`
+- `POST /api/admin/auth/logout`
+
+### Admin demandes
+
+- `GET /api/admin/appointments`
+- `GET /api/admin/appointments/:id`
+- `PATCH /api/admin/appointments/:id/status`
+
+### Admin campagnes
+
+- `GET /api/admin/campaigns`
+- `POST /api/admin/campaigns`
+- `PATCH /api/admin/campaigns/:id`
+
+### Admin contenus
+
+- `GET /api/admin/content`
+- `PATCH /api/admin/content/:id`
 
 ## Format des erreurs
 
-Le backend renvoie un format d'erreur JSON homogène :
+Le backend renvoie un format d'erreur JSON homogene :
 
 ```json
 {
@@ -221,67 +241,54 @@ Le backend renvoie un format d'erreur JSON homogène :
 }
 ```
 
-Codes déjà utilisés :
+Codes deja utilises :
 
 - `NOT_FOUND`
+- `UNAUTHORIZED`
+- `FORBIDDEN`
 - `VALIDATION_ERROR`
 - `SLOT_UNAVAILABLE`
 - `INTERNAL_SERVER_ERROR`
 
-## Modèles métier actuels
+## Modele admin V1
 
-### `Donor`
+Roles :
 
-Champs principaux :
+- `super_admin`
+- `manager`
+- `operator`
 
-- `firstName`
-- `lastName`
-- `birthDate`
-- `gender`
-- `phone`
-- `email`
-- `wilayaCode`
-- `commune`
-- `bloodGroup`
+Auth :
 
-### `AppointmentRequest`
+- bearer JWT simple
+- restauration de session via `GET /api/admin/auth/me`
+- logout stateless en V1
 
-Champs principaux :
+## Modeles metier actuels
 
-- `donorId`
-- `campaignCode`
-- `appointmentDate`
-- `appointmentTime`
-- `donationType`
-- `isExistingDonor`
-- `lastDonationDate`
-- `eligibilityChecklist`
-- `remarks`
-- `locale`
-- `status`
+Collections principales :
 
-## Limites actuelles de la V1 backend
+- `donors`
+- `appointmentrequests`
+- `sitecontents`
+- `faqentries`
+- `donationcampaigns`
+- `adminusers`
 
-- pas d'authentification admin
-- pas de CRUD admin
-- pas d'envoi email ou SMS
-- calcul des créneaux encore statique
-- contenu public avec fallback local si la base n'est pas alimentée
-- seed public disponible, mais pas encore de seed admin ou de seed de jeux de données avancés
+## Limites actuelles
 
-## Validation locale recommandée
+- pas de refresh token
+- pas de revocation de session
+- pas d'audit log admin
+- pas de media manager
+- pas de gestion avancee des creneaux
+- permissions encore simples en V1
 
-Avant de considérer une modification comme stable :
+## Suite logique
 
-```bash
-npm test
-npm run build
-```
+La suite logique apres ce baseline est la phase 7 :
 
-## Prochaine étape logique
-
-Apres les phases 4 et 5 executees :
-
-- lancer la phase 6 admin
-- remplacer le calcul statique des creneaux par une logique reelle de disponibilites
-- deployer une API publique si le frontend en ligne doit utiliser le vrai backend
+- deploiement public du backend
+- observabilite
+- securite de production
+- QA de bout en bout

@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 
+import { AppError } from "../../lib/errors/app-error.js";
 import type { SupportedLocale } from "../../shared/constants/locales.js";
 import { SiteContentModel } from "./content.model.js";
 
@@ -50,6 +51,23 @@ type HomeContent = {
     address: string;
     phone: string;
     email: string;
+  };
+};
+
+type HomeContentPatch = {
+  [K in keyof HomeContent]?: HomeContent[K] extends Array<infer Item>
+    ? Item[]
+    : HomeContent[K] extends object
+      ? Partial<HomeContent[K]>
+      : HomeContent[K];
+};
+
+export type AdminSiteContentItem = {
+  id: string;
+  key: string;
+  localeContent: {
+    fr: HomeContent;
+    ar: HomeContent;
   };
 };
 
@@ -243,7 +261,7 @@ const fallbackHomeContent: Record<SupportedLocale, HomeContent> = {
 
 function mergeHomeContent(
   fallback: HomeContent,
-  override?: Partial<HomeContent> | null,
+  override?: HomeContentPatch | null,
 ): HomeContent {
   if (!override) {
     return fallback;
@@ -288,6 +306,29 @@ function mergeHomeContent(
   };
 }
 
+function serializeAdminContent(document: {
+  _id: unknown;
+  key: string;
+  localeContent?: Partial<Record<SupportedLocale, HomeContentPatch>>;
+}): AdminSiteContentItem {
+  return {
+    id: String(document._id),
+    key: document.key,
+    localeContent: {
+      fr: mergeHomeContent(fallbackHomeContent.fr, document.localeContent?.fr),
+      ar: mergeHomeContent(fallbackHomeContent.ar, document.localeContent?.ar),
+    },
+  };
+}
+
+function createSiteContentNotFoundError() {
+  return new AppError({
+    statusCode: 404,
+    code: "SITE_CONTENT_NOT_FOUND",
+    message: "Site content not found.",
+  });
+}
+
 export async function getHomeContent(locale: SupportedLocale): Promise<HomeContent> {
   if (mongoose.connection.readyState !== 1) {
     return fallbackHomeContent[locale];
@@ -310,4 +351,61 @@ export async function getHomeContent(locale: SupportedLocale): Promise<HomeConte
   }
 
   return mergeHomeContent(fallbackHomeContent[locale], localizedContent);
+}
+
+export async function listAdminSiteContent() {
+  const documents = await SiteContentModel.find({}).sort({ key: 1 }).lean();
+
+  if (documents.length === 0) {
+    return [
+      {
+        id: "home",
+        key: "home",
+        localeContent: {
+          fr: fallbackHomeContent.fr,
+          ar: fallbackHomeContent.ar,
+        },
+      },
+    ];
+  }
+
+  return documents.map((document) =>
+    serializeAdminContent(document as { _id: unknown; key: string; localeContent?: any }),
+  );
+}
+
+export async function updateAdminSiteContentByKey(
+  key: string,
+  localeContent: Partial<Record<SupportedLocale, HomeContentPatch>>,
+) {
+  const document = await SiteContentModel.findOne({ key }).exec();
+
+  if (!document) {
+    throw createSiteContentNotFoundError();
+  }
+
+  const current = document.toObject() as {
+    _id: unknown;
+    key: string;
+    localeContent?: Partial<Record<SupportedLocale, HomeContentPatch>>;
+  };
+
+  document.localeContent = {
+    fr: {
+      ...current.localeContent?.fr,
+      ...localeContent.fr,
+    },
+    ar: {
+      ...current.localeContent?.ar,
+      ...localeContent.ar,
+    },
+  } as never;
+
+  await document.save();
+
+  return serializeAdminContent(document.toObject() as {
+    _id: unknown;
+    key: string;
+    localeContent?: Partial<Record<SupportedLocale, HomeContentPatch>>;
+  });
 }

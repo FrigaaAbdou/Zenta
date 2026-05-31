@@ -1,14 +1,45 @@
 import type { SupportedLocale } from "../../shared/constants/locales.js";
 
-export const APPOINTMENT_TIME_SLOTS = [
-  "08:00",
-  "09:00",
-  "10:00",
-  "11:00",
-  "13:00",
-  "14:00",
-  "15:00",
+export const APPOINTMENT_SLOT_TEMPLATES = [
+  { value: "08:00", label: "08:00", capacity: 3 },
+  { value: "09:00", label: "09:00", capacity: 3 },
+  { value: "10:00", label: "10:00", capacity: 3 },
+  { value: "11:00", label: "11:00", capacity: 2 },
+  { value: "13:00", label: "13:00", capacity: 2 },
+  { value: "14:00", label: "14:00", capacity: 3 },
+  { value: "15:00", label: "15:00", capacity: 2 },
 ] as const;
+
+export const APPOINTMENT_SLOT_BOOKED_STATUSES = [
+  "pending",
+  "confirmed",
+] as const;
+
+export const APPOINTMENT_SLOT_STATUSES = ["open", "full", "closed", "blocked"] as const;
+
+export type AppointmentSlotStatus =
+  (typeof APPOINTMENT_SLOT_STATUSES)[number];
+
+export const ADMIN_APPOINTMENT_STATUSES = [
+  "pending",
+  "confirmed",
+  "rejected",
+  "completed",
+  "cancelled",
+] as const;
+
+export type AdminAppointmentStatus = (typeof ADMIN_APPOINTMENT_STATUSES)[number];
+
+export const ADMIN_APPOINTMENT_STATUS_TRANSITIONS: Record<
+  AdminAppointmentStatus,
+  AdminAppointmentStatus[]
+> = {
+  pending: ["confirmed", "rejected", "cancelled"],
+  confirmed: ["completed", "cancelled"],
+  rejected: [],
+  completed: [],
+  cancelled: [],
+};
 
 export const BLOOD_GROUPS = [
   "A+",
